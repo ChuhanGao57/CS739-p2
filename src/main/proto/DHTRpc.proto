@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "DHT";
+option java_outer_classname = "DHTRpcProto";
+option objc_class_prefix = "HLW";
+
+package DHT;
+
+
+// The greeting service definition.
+service DHTRpc {
+  // Sends a find successor
+  rpc findSuccessor (FindSuccessorRequest) returns (FindSuccessorReply) {}
+}
+
+// The request message containing the user's name.
+message FindSuccessorRequest {
+  int32 id = 1;
+}
+
+// The response message containing the greetings
+message FindSuccessorReply {
+  string address = 1;
+  int32 port = 2;
+}
