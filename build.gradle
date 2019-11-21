@@ -64,14 +64,14 @@ startScripts.enabled = false
 
 task runClient(type: CreateStartScripts) {
     mainClassName = 'DHT.DHTClient'
-    applicationName = 'client'
+    applicationName = 'DHTclient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
 
 task runServer(type: CreateStartScripts) {
     mainClassName = 'DHT.DHTServer'
-    applicationName = 'server'
+    applicationName = 'DHTserver'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
