@@ -49,6 +49,37 @@ dependencies {
     implementation 'io.grpc:grpc-stub:1.25.0'
 
     testCompile 'junit:junit:4.12'
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    testImplementation(
+            'junit:junit:4.12',
+            'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    )
+    testRuntime(
+            'org.junit.jupiter:junit-jupiter-engine:5.4.2',
+            'org.junit.vintage:junit-vintage-engine:5.4.2'
+    )
+}
+
+startScripts.enabled = false
+
+task runClient(type: CreateStartScripts) {
+    mainClassName = 'DHT.DHTClient'
+    applicationName = 'client'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task runServer(type: CreateStartScripts) {
+    mainClassName = 'DHT.DHTServer'
+    applicationName = 'server'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+applicationDistribution.into('bin') {
+    from(runClient)
+    from(runServer)
+    fileMode = 0755
 }
 
 mainClassName = 'DHT.DHTMain'
