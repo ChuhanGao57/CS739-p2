@@ -10,17 +10,34 @@ package DHT;
 
 // The greeting service definition.
 service DHTRpc {
-  // Sends a find successor
-  rpc findSuccessor (FindSuccessorRequest) returns (FindSuccessorReply) {}
+  // Find the node's successor
+  rpc yourSuccessorRPC (empty) returns (addr) {}
+  // find closest preceding finger of a given id
+  rpc closestPrecedingFingerRPC (closestPrecedingFingerRequest) returns (addr) {}
+  // find the node's predecessor
+  rpc yourPredecessorRPC (empty) returns (addr) {}
+  // find successor of given id
+  rpc findSuccessorRPC(findSuccessorRequest) returns (addr) {}
+  // notify i am the new predecessor to another node 
+  rpc IAmPreRPC(addr) returns (empty) {}
+  // keep alive message
+  rpc keepAliveRPC(empty) returns (empty) {}
+
 }
 
-// The request message containing the user's name.
-message FindSuccessorRequest {
-  int32 id = 1;
+message closestPrecedingFingerRequest {
+  int64 id = 1;
 }
 
-// The response message containing the greetings
-message FindSuccessorReply {
+message findSuccessorRequest {
+  int64 id = 1;
+}
+
+message addr {
   string address = 1;
   int32 port = 2;
+}
+
+message empty {
+
 }

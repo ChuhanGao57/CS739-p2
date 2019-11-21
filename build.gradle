@@ -63,15 +63,22 @@ dependencies {
 startScripts.enabled = false
 
 task runClient(type: CreateStartScripts) {
-    mainClassName = 'DHT.DHTClient'
-    applicationName = 'DHTclient'
+    mainClassName = 'DHT.RPCClient'
+    applicationName = 'RPCClient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
 
 task runServer(type: CreateStartScripts) {
-    mainClassName = 'DHT.DHTServer'
-    applicationName = 'DHTserver'
+    mainClassName = 'DHT.RPCServer'
+    applicationName = 'RPCServer'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task runNode(type: CreateStartScripts) {
+    mainClassName = 'DHT.DHTNode'
+    applicationName = 'DHTNode'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
@@ -79,6 +86,7 @@ task runServer(type: CreateStartScripts) {
 applicationDistribution.into('bin') {
     from(runClient)
     from(runServer)
+    from(runNode)
     fileMode = 0755
 }
 
