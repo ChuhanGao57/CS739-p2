@@ -21,7 +21,7 @@ service DHTRpc {
   // notify i am the new predecessor to another node 
   rpc iAmPreRPC(addr) returns (empty) {}
   // keep alive message
-  rpc keepAliveRPC(empty) returns (empty) {}
+  rpc keepAliveRPC(empty) returns (keepAliveReply) {}
 
 }
 
@@ -36,8 +36,13 @@ message findSuccessorRequest {
 message addr {
   string address = 1;
   int32 port = 2;
+  bool flag = 3;
 }
 
 message empty {
+  bool flag = 1;
+}
 
+message keepAliveReply {
+  bool flag = 1;
 }

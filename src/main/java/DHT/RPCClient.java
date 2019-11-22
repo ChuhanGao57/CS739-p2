@@ -6,6 +6,9 @@ import io.grpc.StatusRuntimeException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.protobuf.Empty;
+
 import java.net.InetSocketAddress;
 
 /**
@@ -38,33 +41,108 @@ public class RPCClient {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
-    public void findSuccessor(long id) {
-        //System.out.println("Will try to contact " + id + " ...");
-        findSuccessorRequest request = findSuccessorRequest.newBuilder().setId(id).build();
-        addr reply;
-        try {
-            reply = blockingStub.findSuccessorRPC(request);
-        } catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "findSuccessor RPC failed: {0}", e.getStatus());
-            return;
-        }
-        System.out.println("Received " + reply.getAddress() + ":" +reply.getPort());
-    }
-
     public void iAmPre() {
         String host = local.getAddress().getHostName();
         int port = local.getAddress().getPort();
         addr request = addr.newBuilder().setAddress(host).setPort(port).build();
         empty reply;
-        System.out.println(local.getAddress().getPort() + " telling " + serverAddr.getPort() + " IAmPre");
+        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " IAmPre");
         try {
             reply = blockingStub.iAmPreRPC(request);
         } catch (StatusRuntimeException e) {
+            
             logger.log(Level.WARNING, "IAmPre RPC failed: {0}", e.getStatus());
+            //System.out.println("IAmPre RPC failed");
             return;
         }
-        System.out.println(local.getAddress().getPort() + " told " + port + " IAmPre");
+        System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " IAmPre");
     }
+
+
+    public InetSocketAddress findSuccessor(long id) {
+        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " findSuccessor");
+        findSuccessorRequest request = findSuccessorRequest.newBuilder().setId(id).build();
+        addr reply;
+        try {
+            reply = blockingStub.findSuccessorRPC(request);
+            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " findSuccessor");
+            return new InetSocketAddress(reply.getAddress(), reply.getPort());
+        } catch (StatusRuntimeException e) {
+            logger.log(Level.WARNING, "findSuccessor RPC failed: {0}", e.getStatus());
+            return null;
+        }
+        
+    }
+
+    
+
+    public InetSocketAddress yourSuccessor() {
+        empty request = empty.newBuilder().build();
+        addr reply;
+        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " youSuccessor");
+        try {
+            reply = blockingStub.yourSuccessorRPC(request);
+            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " youSuccessor");
+            if(reply.getFlag()) 
+                return new InetSocketAddress(reply.getAddress(), reply.getPort());
+            else
+                return serverAddr; // Attention
+        } catch (StatusRuntimeException e) {
+            logger.log(Level.WARNING, "yourSuccessor RPC failed: {0}", e.getStatus());
+            return null;
+        }
+        
+    }
+
+
+    public InetSocketAddress closestPrecedingFinger(long id) {
+        closestPrecedingFingerRequest request = closestPrecedingFingerRequest.newBuilder()
+                                                .setId(id).build();
+        addr reply;
+        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " closestPrecedingFinger");
+        try {
+            reply = blockingStub.closestPrecedingFingerRPC(request);
+            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " closestPrecedingFinger");
+            return new InetSocketAddress(reply.getAddress(), reply.getPort());
+        } catch (StatusRuntimeException e) {
+            logger.log(Level.WARNING, "closestPrecedingFinger RPC failed: {0}", e.getStatus());
+            return null;
+        }
+    }
+
+
+    public boolean keepAlive() {
+        empty request = empty.newBuilder().build();
+        keepAliveReply reply;
+        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " keepAlive");
+        try {
+            reply = blockingStub.keepAliveRPC(request);
+            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " keepAlive");
+            return reply.getFlag();
+        } catch (StatusRuntimeException e) {
+            logger.log(Level.WARNING, "keepAlive RPC failed: {0}", e.getStatus());
+            return false;
+        }
+    }
+
+    public InetSocketAddress yourPredecessor() {
+        empty request = empty.newBuilder().build();
+        addr reply;
+        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " yourPredecessor");
+        try {
+            reply = blockingStub.yourPredecessorRPC(request);
+            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " yourPredecessor");
+            if(reply.getFlag()) 
+                return new InetSocketAddress(reply.getAddress(), reply.getPort());
+            else
+                return serverAddr; // Attention
+        } catch (StatusRuntimeException e) {
+            logger.log(Level.WARNING, "yourPredecessor RPC failed: {0}", e.getStatus());
+            return null;
+        }
+    }
+
+
 
 
 

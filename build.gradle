@@ -83,10 +83,18 @@ task runNode(type: CreateStartScripts) {
     classpath = startScripts.classpath
 }
 
+task runChord(type: CreateStartScripts) {
+    mainClassName = 'DHT.Chord'
+    applicationName = 'Chord'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
 applicationDistribution.into('bin') {
     from(runClient)
     from(runServer)
     from(runNode)
+    from(runChord)
     fileMode = 0755
 }
 

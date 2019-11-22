@@ -69,16 +69,6 @@ public class RPCServer {
 
     class DHTRpcImpl extends DHTRpcGrpc.DHTRpcImplBase {
         @Override
-        public void findSuccessorRPC(findSuccessorRequest req, StreamObserver<addr> responseObserver) {
-            long id = req.getId();
-            System.out.println("Received ID: " + id);
-            addr reply = addr.newBuilder().setAddress("HELLO").setPort(888).build();
-            //reply.setPort(8888);
-            responseObserver.onNext(reply);
-            responseObserver.onCompleted();
-        } 
-        
-        @Override
         public void iAmPreRPC(addr req, StreamObserver<empty> responseObserver) {
             System.out.println(local.getAddress().getPort() + " receiving from " + req.getPort() + " iAmPre");
             InetSocketAddress newPre = new InetSocketAddress(req.getAddress(), req.getPort());
@@ -88,6 +78,86 @@ public class RPCServer {
             responseObserver.onCompleted();
             System.out.println(local.getAddress().getPort() + " received from " + req.getPort() + " iAmPre");
         }
+
+        @Override
+        public void findSuccessorRPC(findSuccessorRequest req, StreamObserver<addr> responseObserver) {
+            System.out.println(local.getAddress().getPort() + " receiving from " + req.getId() + " findSuccessor");
+            long id = req.getId();
+            InetSocketAddress succ = local.find_successor(id);
+            addr reply = addr.newBuilder().setAddress(succ.getHostName()).setPort(succ.getPort()).build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            System.out.println(local.getAddress().getPort() + " received from " + req.getId() + " findSuccessor");
+        } 
+        
+        @Override
+        public void yourSuccessorRPC(empty req, StreamObserver<addr> responseObserver) {
+            System.out.println(local.getAddress().getPort() + " receiving from " + "client" + " yourSuccessor");
+            InetSocketAddress succ = null;
+            succ = local.getSuccessor();
+            addr reply;
+            if(succ != null) {
+                reply = addr.newBuilder()
+                            .setFlag(true)
+                            .setAddress(succ.getHostName())
+                            .setPort(succ.getPort())
+                            .build();
+            }
+            else {
+                reply = addr.newBuilder()
+                            .setFlag(false)
+                            .build();
+            }
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            System.out.println(local.getAddress().getPort() + " received from " + "client" + " yourSuccessor");
+        }
+
+        @Override
+        public void yourPredecessorRPC(empty req, StreamObserver<addr> responseObserver) {
+            System.out.println(local.getAddress().getPort() + " receiving from " + "client" + " yourPredecessor");
+            InetSocketAddress pred = null;
+            pred = local.getPredecessor();
+            addr reply;
+            if(pred != null) {
+                reply = addr.newBuilder()
+                            .setFlag(true)
+                            .setAddress(pred.getHostName())
+                            .setPort(pred.getPort())
+                            .build();
+            }
+            else {
+                reply = addr.newBuilder()
+                            .setFlag(false)
+                            .build();
+            }
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            System.out.println(local.getAddress().getPort() + " received from " + "client" + " yourPredecessor");
+        }
+
+        @Override
+        public void closestPrecedingFingerRPC(closestPrecedingFingerRequest req, StreamObserver<addr> responseObserver) {
+            System.out.println(local.getAddress().getPort() + " receiving from " + req.getId() + " closestPrecedingFinger");
+            addr reply;
+            long id = req.getId();
+            InetSocketAddress result = local.closest_preceding_finger(id);
+            reply = addr.newBuilder().setAddress(result.getHostName()).setPort(result.getPort()).build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            System.out.println(local.getAddress().getPort() + " received from " + req.getId() + " closestPrecedingFinger");
+        }
+
+        @Override 
+        public void keepAliveRPC(empty req, StreamObserver<keepAliveReply> responseObserver) {
+            System.out.println(local.getAddress().getPort() + " receiving from " + "client" + " keepAlive");
+            keepAliveReply reply;
+            reply = keepAliveReply.newBuilder().setFlag(true).build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            System.out.println(local.getAddress().getPort() + " received from " + "client" + " keepAlive");
+        }
+
     }
     
 }
