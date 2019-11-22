@@ -5,6 +5,9 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.logging.Logger;
+
+import com.google.protobuf.Empty;
+
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
@@ -16,9 +19,11 @@ public class RPCServer {
 
     private Server server;
     private InetSocketAddress address;
+    private DHTNode local;
 
-    public RPCServer(InetSocketAddress _address) throws IOException {
-        address = _address;
+    public RPCServer(DHTNode _local) throws IOException {
+        local = _local;
+        address = local.getAddress();
         // System.out.println("RPC Server starting");
         this.start();
         //this.blockUntilShutdown();
@@ -62,7 +67,7 @@ public class RPCServer {
     //     // server.blockUntilShutdown();
     // }
 
-    static class DHTRpcImpl extends DHTRpcGrpc.DHTRpcImplBase {
+    class DHTRpcImpl extends DHTRpcGrpc.DHTRpcImplBase {
         @Override
         public void findSuccessorRPC(findSuccessorRequest req, StreamObserver<addr> responseObserver) {
             long id = req.getId();
@@ -71,7 +76,18 @@ public class RPCServer {
             //reply.setPort(8888);
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
-        }   
+        } 
+        
+        @Override
+        public void iAmPreRPC(addr req, StreamObserver<empty> responseObserver) {
+            System.out.println(local.getAddress().getPort() + " receiving from " + req.getPort() + " iAmPre");
+            InetSocketAddress newPre = new InetSocketAddress(req.getAddress(), req.getPort());
+            local.notified(newPre);
+            empty reply = empty.newBuilder().build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            System.out.println(local.getAddress().getPort() + " received from " + req.getPort() + " iAmPre");
+        }
     }
     
 }

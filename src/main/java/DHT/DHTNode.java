@@ -53,7 +53,7 @@ public class DHTNode {
 
 		// if the updated one is successor, notify the new successor
 		if (i == 1 && value != null && !value.equals(localAddress)) {
-			IAmPre(value);
+			iAmPre(value);
 		}
     }
     
@@ -61,20 +61,45 @@ public class DHTNode {
 	 * Notify successor that this node should be its predecessor
 	 * @param successor
 	 */
-	public void IAmPre(InetSocketAddress successor) {
+	public void iAmPre(InetSocketAddress successor) {
 		if (successor!=null && !successor.equals(localAddress)) {
         // if(true) {
-            System.out.println("Creating new RPC Client");
-            RPCClient client = new RPCClient(successor.getHostName(), successor.getPort());
-            client.findSuccessor(111);
+            //System.out.println("Creating new RPC Client");
+            RPCClient client = new RPCClient(this, successor.getHostName(), successor.getPort());
+            client.iAmPre();
         }
 			// return Helper.sendRequest(successor, "IAMPRE_"+localAddress.getAddress().toString()+":"+localAddress.getPort());
 		
     }
+
+    /**
+	 * Being notified by another node, set it as my predecessor if it is.
+	 * @param newpre
+	 */
+	public void notified (InetSocketAddress newpre) {
+		if (predecessor == null || predecessor.equals(localAddress)) {
+			this.setPredecessor(newpre);
+		}
+		else {
+			long oldpre_id = Helper.hashSocketAddress(predecessor);
+			long local_relative_id = Helper.computeRelativeId(localId, oldpre_id);
+			long newpre_relative_id = Helper.computeRelativeId(Helper.hashSocketAddress(newpre), oldpre_id);
+			if (newpre_relative_id > 0 && newpre_relative_id < local_relative_id)
+				this.setPredecessor(newpre);
+		}
+	}
     
     public static void main (String[] args) throws IOException, InterruptedException {
         
     }
+
+    /**
+	 * Set predecessor using a new value.
+	 * @param pre
+	 */
+	private synchronized void setPredecessor(InetSocketAddress pre) {
+		predecessor = pre;
+	}
 
 
     /**

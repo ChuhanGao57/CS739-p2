@@ -19,7 +19,7 @@ service DHTRpc {
   // find successor of given id
   rpc findSuccessorRPC(findSuccessorRequest) returns (addr) {}
   // notify i am the new predecessor to another node 
-  rpc IAmPreRPC(addr) returns (empty) {}
+  rpc iAmPreRPC(addr) returns (empty) {}
   // keep alive message
   rpc keepAliveRPC(empty) returns (empty) {}
 

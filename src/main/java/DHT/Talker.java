@@ -23,7 +23,7 @@ public class Talker implements Runnable{
 
 	public void run() {
 		try {
-			RPCServer server = new RPCServer(local.getAddress());
+			RPCServer server = new RPCServer(local);
 		} catch (IOException e) {
 			throw new RuntimeException(
 					"Cannot initiate RPC server", e);
