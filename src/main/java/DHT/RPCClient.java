@@ -22,13 +22,13 @@ public class RPCClient {
     private InetSocketAddress serverAddr;
 
     public RPCClient(DHTNode _local, String host, int port) {
-        this(ManagedChannelBuilder.forAddress(host, port)
+        this(ManagedChannelBuilder.forAddress("localhost", port)
         // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
         // needing certificates.
         .usePlaintext()
         .build());
         local = _local;
-        serverAddr = new InetSocketAddress(host, port);
+        serverAddr = new InetSocketAddress("localhost", port);
     }
 
     /** Construct client for accessing HelloWorld server using the existing channel. */
@@ -37,8 +37,9 @@ public class RPCClient {
         blockingStub = DHTRpcGrpc.newBlockingStub(channel);
     }
 
-    public void shutdown() throws InterruptedException {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    public void shutdown() {
+        channel.shutdown();
+        // channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
     public void iAmPre() {
@@ -46,7 +47,7 @@ public class RPCClient {
         int port = local.getAddress().getPort();
         addr request = addr.newBuilder().setAddress(host).setPort(port).build();
         empty reply;
-        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " IAmPre");
+         // System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " IAmPre");
         try {
             reply = blockingStub.iAmPreRPC(request);
         } catch (StatusRuntimeException e) {
@@ -55,17 +56,17 @@ public class RPCClient {
             //System.out.println("IAmPre RPC failed");
             return;
         }
-        System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " IAmPre");
+         // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " IAmPre");
     }
 
 
     public InetSocketAddress findSuccessor(long id) {
-        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " findSuccessor");
+        // System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " findSuccessor");
         findSuccessorRequest request = findSuccessorRequest.newBuilder().setId(id).build();
         addr reply;
         try {
             reply = blockingStub.findSuccessorRPC(request);
-            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " findSuccessor");
+            // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " findSuccessor");
             return new InetSocketAddress(reply.getAddress(), reply.getPort());
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "findSuccessor RPC failed: {0}", e.getStatus());
@@ -79,10 +80,10 @@ public class RPCClient {
     public InetSocketAddress yourSuccessor() {
         empty request = empty.newBuilder().build();
         addr reply;
-        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " youSuccessor");
+        // System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " youSuccessor");
         try {
             reply = blockingStub.yourSuccessorRPC(request);
-            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " youSuccessor");
+            // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " youSuccessor");
             if(reply.getFlag()) 
                 return new InetSocketAddress(reply.getAddress(), reply.getPort());
             else
@@ -99,10 +100,10 @@ public class RPCClient {
         closestPrecedingFingerRequest request = closestPrecedingFingerRequest.newBuilder()
                                                 .setId(id).build();
         addr reply;
-        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " closestPrecedingFinger");
+        // System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " closestPrecedingFinger");
         try {
             reply = blockingStub.closestPrecedingFingerRPC(request);
-            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " closestPrecedingFinger");
+            // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " closestPrecedingFinger");
             return new InetSocketAddress(reply.getAddress(), reply.getPort());
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "closestPrecedingFinger RPC failed: {0}", e.getStatus());
@@ -114,10 +115,10 @@ public class RPCClient {
     public boolean keepAlive() {
         empty request = empty.newBuilder().build();
         keepAliveReply reply;
-        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " keepAlive");
+        // System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " keepAlive");
         try {
             reply = blockingStub.keepAliveRPC(request);
-            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " keepAlive");
+            // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " keepAlive");
             return reply.getFlag();
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "keepAlive RPC failed: {0}", e.getStatus());
@@ -128,10 +129,10 @@ public class RPCClient {
     public InetSocketAddress yourPredecessor() {
         empty request = empty.newBuilder().build();
         addr reply;
-        System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " yourPredecessor");
+        // System.out.println(local.getAddress().getPort() + " sending " + serverAddr.getPort() + " yourPredecessor");
         try {
             reply = blockingStub.yourPredecessorRPC(request);
-            System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " yourPredecessor");
+            // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " yourPredecessor");
             if(reply.getFlag()) 
                 return new InetSocketAddress(reply.getAddress(), reply.getPort());
             else

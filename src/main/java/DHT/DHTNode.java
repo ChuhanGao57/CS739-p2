@@ -14,10 +14,11 @@ public class DHTNode {
     // RPCClient rpcClient;
     // RPCServer rpcServer;
     private Listener listener;
-	// private Stabilize stabilize;
-    // private FixFingers fix_fingers;
+	private Stabilize stabilize;
+	private FixFingers fix_fingers;
+	private AskPredecessor ask_predecessor;
     
-    public DHTNode (InetSocketAddress address) throws IOException, InterruptedException {
+    public DHTNode (InetSocketAddress address) throws IOException {
 
 		localAddress = address;
 		localId = Helper.hashSocketAddress(localAddress);
@@ -35,10 +36,9 @@ public class DHTNode {
 
 		// initialize threads
         listener = new Listener(this);
-        // listener.start();
-		// stabilize = new Stabilize(this);
-		// fix_fingers = new FixFingers(this);
-		// ask_predecessor = new AskPredecessor(this);
+		stabilize = new Stabilize(this);
+		fix_fingers = new FixFingers(this);
+		ask_predecessor = new AskPredecessor(this);
     }
 
     /**
@@ -57,6 +57,7 @@ public class DHTNode {
             if(contact != null) {
                 RPCClient client = new RPCClient(this, contact.getHostName(), contact.getPort());
                 successor = client.findSuccessor(localId);
+                client.shutdown();
             }
             
 			if (successor == null)  {
@@ -68,9 +69,9 @@ public class DHTNode {
 
 		// start all threads	
 		listener.start();
-		// stabilize.start();
-		// fix_fingers.start();
-		// ask_predecessor.start();
+		stabilize.start();
+		fix_fingers.start();
+		ask_predecessor.start();
 
 		return true;
 	}
@@ -102,6 +103,7 @@ public class DHTNode {
             //System.out.println("Creating new RPC Client");
             RPCClient client = new RPCClient(this, successor.getHostName(), successor.getPort());
             client.iAmPre();
+            client.shutdown();
         }
 			// return Helper.sendRequest(successor, "IAMPRE_"+localAddress.getAddress().toString()+":"+localAddress.getPort());
 		
@@ -140,6 +142,7 @@ public class DHTNode {
 		if (!pre.equals(localAddress)) {
             RPCClient client = new RPCClient(this, pre.getHostName(), pre.getPort());
             ret = client.yourSuccessor();
+            client.shutdown();
             //ret = Helper.requestAddress(pre, "YOURSUCC");
         }
 		// if ret is still null, set it as local node, return
@@ -180,6 +183,7 @@ public class DHTNode {
                 if(n != null) {
                     client = new RPCClient(this, n.getHostName(), n.getPort());
                     result = client.closestPrecedingFinger(findid);
+                    client.shutdown();
                 }
 				// if fail to get response, set n to most recently 
 				if (result == null) {
@@ -188,6 +192,7 @@ public class DHTNode {
                     if(n != null) {
                         client = new RPCClient(this, n.getHostName(), n.getPort());
                         n_successor = client.yourSuccessor();
+                        client.shutdown();
                     }
                     else 
                         n_successor = null;               
@@ -212,6 +217,7 @@ public class DHTNode {
                     if(result != null) {
                         client = new RPCClient(this, result.getHostName(), result.getPort());
                         n_successor = client.yourSuccessor();
+                        client.shutdown();
                     }
                     else {
                         n_successor = null;
@@ -226,6 +232,7 @@ public class DHTNode {
                         if(n != null) {
                             client = new RPCClient(this, n.getHostName(), n.getPort());
                             n_successor = client.yourSuccessor();
+                            client.shutdown();
                         }
                         else
                             n_successor = null;
@@ -265,6 +272,7 @@ public class DHTNode {
 			if (ith_finger_relative_id > 0 && ith_finger_relative_id < findid_relative)  {
                 client = new RPCClient(this, ith_finger.getHostName(), ith_finger.getPort());
                 boolean response = client.keepAlive();
+                client.shutdown();
                 //String response  = Helper.sendRequest(ith_finger, "KEEP");
 
 				//it is alive, return it
@@ -289,7 +297,7 @@ public class DHTNode {
 	 * @param i: index or command code
 	 * @param value
 	 */
-	public synchronized void updateFingers(int i, InetSocketAddress value) {
+	public synchronized void updateFingers(int i, InetSocketAddress value)  {
 
 		// valid index in [1, 32], just update the ith finger
 		if (i > 0 && i <= 32) {
@@ -356,6 +364,7 @@ public class DHTNode {
                 if(p != null) {
                     RPCClient client = new RPCClient(this, p.getHostName(), p.getPort());
                     p_pre = client.yourPredecessor();
+                    client.shutdown();
                 }
                 else
                     p_pre = null;
@@ -422,6 +431,13 @@ public class DHTNode {
     public static void main (String[] args) throws IOException, InterruptedException {
         
     }
+
+    /**
+	 * Clear predecessor.
+	 */
+	public void clearPredecessor () {
+		setPredecessor(null);
+	}
 
     /**
 	 * Set predecessor using a new value.
@@ -522,12 +538,12 @@ public class DHTNode {
 	public void stopAllThreads() {
 		if (listener != null)
 			listener.toDie();
-		// if (fix_fingers != null)
-		// 	fix_fingers.toDie();
-		// if (stabilize != null)
-		// 	stabilize.toDie();
-		// if (ask_predecessor != null)
-		// 	ask_predecessor.toDie();
+		if (fix_fingers != null)
+			fix_fingers.toDie();
+		if (stabilize != null)
+			stabilize.toDie();
+		if (ask_predecessor != null)
+			ask_predecessor.toDie();
 	}
 
 

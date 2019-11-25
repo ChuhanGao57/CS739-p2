@@ -20,7 +20,9 @@ public class DHTMain {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        
+        InetSocketAddress address1 = new InetSocketAddress("localhost", 9001);
+        DHTNode node1 = new DHTNode(address1);
+        System.out.println(node1.getAddress().getHostName());
 
     } 
 }
