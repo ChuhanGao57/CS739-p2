@@ -318,6 +318,29 @@ public class Helper {
 
 	}
 
+	public static String getIpString(InetSocketAddress socketAddress) {
+		String ip = socketAddress.getAddress().getHostAddress();
+		if (ip.startsWith("/")) {
+			ip = ip.substring(1);
+		}
+		return ip;
+	}
+
+	public static InetSocketAddress createSocketAddress(String ipString, int port) {
+		if (ipString.startsWith("/")) {
+			ipString = ipString.substring(1);
+		}
+		InetAddress addr = null;
+        try {
+            addr = InetAddress.getByName(ipString);
+            return new InetSocketAddress(addr, port);
+            
+        } catch (UnknownHostException e) {
+			System.out.println("Helper Cannot create ip address: " + ipString);
+			return null;
+        }
+	}
+
 	/**
 	 * Read one line from input stream
 	 * @param in: input steam

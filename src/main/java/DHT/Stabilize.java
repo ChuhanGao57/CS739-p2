@@ -25,7 +25,8 @@ public class Stabilize extends Thread {
                 // InetSocketAddress x = Helper.requestAddress(successor, "YOURPRE");
                 InetSocketAddress x = null;
                 if(successor != null) {
-                    RPCClient client = new RPCClient(local, successor.getHostName(), successor.getPort());
+					// RPCClient client = new RPCClient(local, successor.getHostName(), successor.getPort());
+					RPCClient client = new RPCClient(local, successor);
 					x = client.yourPredecessor();
 					client.shutdown();
                 }

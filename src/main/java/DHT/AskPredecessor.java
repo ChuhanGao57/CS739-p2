@@ -21,7 +21,8 @@ public class AskPredecessor extends Thread {
 				// if (response == null || !response.equals("ALIVE")) {
 				// 	local.clearPredecessor();	
                 // }
-                RPCClient client = new RPCClient(local, predecessor.getHostName(), predecessor.getPort());
+				// RPCClient client = new RPCClient(local, predecessor.getHostName(), predecessor.getPort());
+				RPCClient client = new RPCClient(local, predecessor);
 				boolean response = client.keepAlive();
 				client.shutdown();
                 if(!response)

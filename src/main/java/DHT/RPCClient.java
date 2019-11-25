@@ -22,13 +22,23 @@ public class RPCClient {
     private InetSocketAddress serverAddr;
 
     public RPCClient(DHTNode _local, String host, int port) {
-        this(ManagedChannelBuilder.forAddress("localhost", port)
+        this(ManagedChannelBuilder.forAddress("127.0.0.1", port)
         // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
         // needing certificates.
         .usePlaintext()
         .build());
         local = _local;
         serverAddr = new InetSocketAddress("localhost", port);
+    }
+
+    public RPCClient(DHTNode _local, InetSocketAddress _serverAddr) {
+        this(ManagedChannelBuilder.forAddress(_serverAddr.getAddress().getHostAddress() , _serverAddr.getPort())
+        // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
+        // needing certificates.
+        .usePlaintext()
+        .build());
+        local = _local;
+        serverAddr = _serverAddr;
     }
 
     /** Construct client for accessing HelloWorld server using the existing channel. */
@@ -43,7 +53,8 @@ public class RPCClient {
     }
 
     public void iAmPre() {
-        String host = local.getAddress().getHostName();
+        // String host = local.getAddress().getHostName();
+        String host = local.getIpString();
         int port = local.getAddress().getPort();
         addr request = addr.newBuilder().setAddress(host).setPort(port).build();
         empty reply;
@@ -67,7 +78,9 @@ public class RPCClient {
         try {
             reply = blockingStub.findSuccessorRPC(request);
             // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " findSuccessor");
-            return new InetSocketAddress(reply.getAddress(), reply.getPort());
+            // return new InetSocketAddress(reply.getAddress(), reply.getPort());
+            return Helper.createSocketAddress(reply.getAddress(), reply.getPort());
+            
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "findSuccessor RPC failed: {0}", e.getStatus());
             return null;
@@ -84,8 +97,11 @@ public class RPCClient {
         try {
             reply = blockingStub.yourSuccessorRPC(request);
             // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " youSuccessor");
-            if(reply.getFlag()) 
-                return new InetSocketAddress(reply.getAddress(), reply.getPort());
+            if(reply.getFlag()) {
+                // return new InetSocketAddress(reply.getAddress(), reply.getPort());
+                return Helper.createSocketAddress(reply.getAddress(), reply.getPort());
+            }
+                
             else
                 return serverAddr; // Attention
         } catch (StatusRuntimeException e) {
@@ -104,7 +120,8 @@ public class RPCClient {
         try {
             reply = blockingStub.closestPrecedingFingerRPC(request);
             // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " closestPrecedingFinger");
-            return new InetSocketAddress(reply.getAddress(), reply.getPort());
+            // return new InetSocketAddress(reply.getAddress(), reply.getPort());\
+            return Helper.createSocketAddress(reply.getAddress(), reply.getPort());
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "closestPrecedingFinger RPC failed: {0}", e.getStatus());
             return null;
@@ -134,7 +151,7 @@ public class RPCClient {
             reply = blockingStub.yourPredecessorRPC(request);
             // System.out.println(local.getAddress().getPort() + " sent " + serverAddr.getPort() + " yourPredecessor");
             if(reply.getFlag()) 
-                return new InetSocketAddress(reply.getAddress(), reply.getPort());
+                return Helper.createSocketAddress(reply.getAddress(), reply.getPort());
             else
                 return serverAddr; // Attention
         } catch (StatusRuntimeException e) {

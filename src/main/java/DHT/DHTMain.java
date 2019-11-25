@@ -1,7 +1,7 @@
 package DHT;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.*;
 
 public class DHTMain {
     
@@ -20,9 +20,17 @@ public class DHTMain {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        InetSocketAddress address1 = new InetSocketAddress("localhost", 9001);
-        DHTNode node1 = new DHTNode(address1);
-        System.out.println(node1.getAddress().getHostName());
+        InetAddress ip = null;
+        try {
+            ip = InetAddress.getByName("/127.0.0.1");
+            System.out.println("Received ip address: " + ip.toString());
+            
+        } catch (UnknownHostException e) {
+            System.out.println("Cannot create ip address");
+        }
+        InetSocketAddress newPre = new InetSocketAddress(ip, 10001);
+        System.out.println("Socket address: " + newPre.toString());
+
 
     } 
 }

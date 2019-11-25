@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.Empty;
 
-import java.net.InetSocketAddress;
+import java.net.*;
 import java.util.HashMap;
 
 /**
@@ -71,8 +71,15 @@ public class RPCServer {
         @Override
         public void iAmPreRPC(addr req, StreamObserver<empty> responseObserver) {
             // System.out.println(local.getAddress().getPort() + " receiving from " + req.getPort() + " iAmPre");
-            InetSocketAddress newPre = new InetSocketAddress(req.getAddress(), req.getPort());
-            local.notified(newPre);
+            InetAddress ip = null;
+            try {
+                ip = InetAddress.getByName(req.getAddress());
+                InetSocketAddress newPre = new InetSocketAddress(ip, req.getPort());
+                local.notified(newPre);
+			} catch (UnknownHostException e) {
+				System.out.println("Cannot create ip address: " + req.getAddress());
+			}
+            
             empty reply = empty.newBuilder().build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
@@ -84,7 +91,8 @@ public class RPCServer {
             // System.out.println(local.getAddress().getPort() + " receiving from " + req.getId() + " findSuccessor");
             long id = req.getId();
             InetSocketAddress succ = local.find_successor(id);
-            addr reply = addr.newBuilder().setAddress(succ.getHostName()).setPort(succ.getPort()).build();
+            String succIp = Helper.getIpString(succ);
+            addr reply = addr.newBuilder().setAddress(succIp).setPort(succ.getPort()).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
             // System.out.println(local.getAddress().getPort() + " received from " + req.getId() + " findSuccessor");
@@ -99,7 +107,7 @@ public class RPCServer {
             if(succ != null) {
                 reply = addr.newBuilder()
                             .setFlag(true)
-                            .setAddress(succ.getHostName())
+                            .setAddress(Helper.getIpString(succ))
                             .setPort(succ.getPort())
                             .build();
             }
@@ -122,7 +130,7 @@ public class RPCServer {
             if(pred != null) {
                 reply = addr.newBuilder()
                             .setFlag(true)
-                            .setAddress(pred.getHostName())
+                            .setAddress(Helper.getIpString(pred))
                             .setPort(pred.getPort())
                             .build();
             }
@@ -142,7 +150,7 @@ public class RPCServer {
             addr reply;
             long id = req.getId();
             InetSocketAddress result = local.closest_preceding_finger(id);
-            reply = addr.newBuilder().setAddress(result.getHostName()).setPort(result.getPort()).build();
+            reply = addr.newBuilder().setAddress(Helper.getIpString(result)).setPort(result.getPort()).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
             // System.out.println(local.getAddress().getPort() + " received from " + req.getId() + " closestPrecedingFinger");

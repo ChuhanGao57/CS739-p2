@@ -35,7 +35,7 @@ public class Chord {
 		
 		// create node
 		// m_node = new DHTNode(Helper.createSocketAddress(local_ip+":"+args[0]));
-		InetSocketAddress addr = new InetSocketAddress("localhost", Integer.valueOf(args[0]));
+		InetSocketAddress addr = new InetSocketAddress(InetAddress.getLocalHost(), Integer.valueOf(args[0]));
         m_node = new DHTNode(addr);
 		// determine if it's creating or joining a existing ring
 		// create, contact is this node itself
@@ -45,8 +45,8 @@ public class Chord {
 		
 		// join, contact is another node
 		else if (args.length == 3) {
-			//m_contact = Helper.createSocketAddress(args[1]+":"+args[2]);
-			m_contact = new InetSocketAddress("localhost", Integer.valueOf(args[2]));
+			m_contact = Helper.createSocketAddress(args[1]+":"+args[2]);
+			// m_contact = new InetSocketAddress("localhost", Integer.valueOf(args[2]));
 			if (m_contact == null) {
 				System.out.println("Cannot find address you are trying to contact. Now exit.");
 				return;
