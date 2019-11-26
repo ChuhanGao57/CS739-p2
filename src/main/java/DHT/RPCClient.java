@@ -21,6 +21,10 @@ public class RPCClient {
     private DHTNode local;
     private InetSocketAddress serverAddr;
 
+    public RPCClient(InetSocketAddress _serverAddr) {
+        this(null, _serverAddr);
+    }
+
     public RPCClient(DHTNode _local, String host, int port) {
         this(ManagedChannelBuilder.forAddress("127.0.0.1", port)
         // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
@@ -53,6 +57,10 @@ public class RPCClient {
     }
 
     public void iAmPre() {
+        if(local == null) {
+            System.out.println("WARNING: DHT Node is null. Cannot make iAmPre RPC call!");
+            return;
+        }
         // String host = local.getAddress().getHostName();
         String host = local.getIpString();
         int port = local.getAddress().getPort();
