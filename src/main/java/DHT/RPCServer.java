@@ -166,6 +166,14 @@ public class RPCServer {
             // System.out.println(local.getAddress().getPort() + " received from " + "client" + " keepAlive");
         }
 
+        @Override
+        public void getIdRPC(empty req, StreamObserver<getIdReply> responseObserver) {
+            getIdReply reply;
+            reply = getIdReply.newBuilder().setId(local.getId()).build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+        }
+
     }
     
 }

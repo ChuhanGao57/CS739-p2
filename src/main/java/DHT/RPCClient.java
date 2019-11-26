@@ -160,6 +160,18 @@ public class RPCClient {
         }
     }
 
+    public long getId() {
+        empty request = empty.newBuilder().build();
+        getIdReply reply;
+        try {
+            reply = blockingStub.getIdRPC(request);
+            return reply.getId();
+        } catch (StatusRuntimeException e) {
+            logger.log(Level.WARNING, "getId RPC failed: {0}", e.getStatus());
+            return -1;
+        }
+    }
+
 
 
 
