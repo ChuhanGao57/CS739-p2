@@ -68,6 +68,7 @@ public class DHTMain {
         m_helper = new Helper();
 
         int numNode = 3;
+        int timeToSleep = 60 * 1000; // in ms
         List<InetSocketAddress> addrList = new ArrayList<>();
         List<DHTNode> nodeList = new ArrayList<>();
         int startingPort = 8001;
@@ -111,9 +112,9 @@ public class DHTMain {
                     return;
                 }
             }
-            System.out.println("Sleeping 60 sec before testing");
+            System.out.println("Sleeping " + timeToSleep/1000 + " sec before testing");
             try {
-                Thread.sleep(60 * 1000);
+                Thread.sleep(timeToSleep);
             } catch(InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
