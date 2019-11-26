@@ -122,6 +122,8 @@ public class Helper {
 	 * @return relative identifier
 	 */
 	public static long computeRelativeId (long universal, long local) {
+		if(powerOfTwo == null)
+			System.out.println("PowerOfTwo is null");
 		long ret = universal - local;
 		if (ret < 0) {
 			ret += powerOfTwo.get(32);
@@ -163,6 +165,8 @@ public class Helper {
 	 * @return finger[i].start's identifier
 	 */
 	public static long ithStart (long nodeid, int i) {
+		if(powerOfTwo == null)
+			System.out.println("PowerOfTwo is null");
 		return (nodeid + powerOfTwo.get(i-1)) % powerOfTwo.get(32);
 	}
 
