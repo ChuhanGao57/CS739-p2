@@ -69,10 +69,7 @@ public class DHTNode {
 		}
 
 		// start all threads	
-		listener.start();
-		stabilize.start();
-		fix_fingers.start();
-		ask_predecessor.start();
+		startAllThreads();
 
 		return true;
 	}
@@ -561,6 +558,13 @@ public class DHTNode {
 			stabilize.toDie();
 		if (ask_predecessor != null)
 			ask_predecessor.toDie();
+	}
+
+	public void startAllThreads() {
+		listener.start();
+		stabilize.start();
+		fix_fingers.start();
+		ask_predecessor.start();
 	}
 
 

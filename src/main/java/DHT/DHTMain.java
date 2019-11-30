@@ -392,7 +392,7 @@ public class DHTMain {
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
         
-        DHTMain.testFailure();
+        DHTMain.testQueryKeys();
 
     } 
 }
