@@ -90,11 +90,19 @@ task runChord(type: CreateStartScripts) {
     classpath = startScripts.classpath
 }
 
+task runBench(type: CreateStartScripts) {
+    mainClassName = 'DHT.DHTBench'
+    applicationName = 'Bench'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
 applicationDistribution.into('bin') {
     from(runClient)
     from(runServer)
     from(runNode)
     from(runChord)
+    from(runBench)
     fileMode = 0755
 }
 

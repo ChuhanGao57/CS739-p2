@@ -244,7 +244,7 @@ public class DHTMain {
     }
 
     private static boolean buildRing(int numNode, List<InetSocketAddress> addrList, List<DHTNode> nodeList) {
-        int startingPort = 8001;
+        int startingPort = 6001;
         for(int i = 0; i < numNode; i++) {
             addrList.add(new InetSocketAddress("localhost", startingPort + i));
             try {
