@@ -166,7 +166,7 @@ public class DHTMain {
             }
             long startTime = System.currentTimeMillis();
             long lastTestTime = startTime;
-            int initialSleep = 5 * 1000;
+            int initialSleep = 3 * 1000;
             System.out.println("Sleeping " + initialSleep/1000 + " sec before testing");
             try {
                 Thread.sleep(initialSleep);
@@ -433,7 +433,7 @@ public class DHTMain {
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
         
-        DHTMain.testKill();
+        DHTMain.testFailure();
 
     } 
 }
