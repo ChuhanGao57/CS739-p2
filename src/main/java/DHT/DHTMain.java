@@ -273,6 +273,7 @@ public class DHTMain {
                 if(query.getPort() != nodeCorrect.getPort()) {
                     errCnt[j] += 1;
                     System.out.println(query.toString() + " VS " + nodeCorrect.toString());
+                    System.out.println("Key: " + Helper.hashString(randomKey));
                     //return;
                 }
             }
@@ -336,6 +337,8 @@ public class DHTMain {
 
         nodeList.sort((DHTNode n1, DHTNode n2) -> Long.compare(n1.getId(), n2.getId()));
         addrList.sort((InetSocketAddress a1, InetSocketAddress a2) -> Long.compare(Helper.hashSocketAddress(a1), Helper.hashSocketAddress(a2)));
+        for(DHTNode node : nodeList)
+            System.out.println("Node id: " + node.getId());
         return true;
     }
 
