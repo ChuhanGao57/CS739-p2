@@ -166,7 +166,7 @@ public class DHTMain {
             }
             long startTime = System.currentTimeMillis();
             long lastTestTime = startTime;
-            int initialSleep = 15 * 1000;
+            int initialSleep = 5 * 1000;
             System.out.println("Sleeping " + initialSleep/1000 + " sec before testing");
             try {
                 Thread.sleep(initialSleep);
@@ -332,7 +332,12 @@ public class DHTMain {
             ids[i] = nodeList.get(i).getId();
         }
         hash = Helper.hashString(key);
-        System.out.println(hash <= ids[0] || hash > ids[numNode - 1]);
+        if(hash <= ids[0] || hash > ids[numNode - 1])
+            System.out.println("Flag 1");
+        for(int i = 0; i < numNode - 1; i++) {
+            if(hash > ids[i] && hash <= ids[i+1])
+                System.out.println("Flag 2: " + nodeList.get(i+1).getAddress());
+        }
     }
  
     private static boolean buildRing(int numNode, List<InetSocketAddress> addrList, List<DHTNode> nodeList) {
