@@ -154,7 +154,7 @@ public class DHTMain {
 
     public static void testFailure() {
         m_helper = new Helper();
-        int numNode = 3;
+        int numNode = 10;
         int numKey = 50;
         int timeToSleep = 3 * 1000; // in ms
         List<InetSocketAddress> addrList = new ArrayList<>();
@@ -166,7 +166,7 @@ public class DHTMain {
             }
             long startTime = System.currentTimeMillis();
             long lastTestTime = startTime;
-            int initialSleep = 3 * 1000;
+            int initialSleep = 10 * 1000;
             System.out.println("Sleeping " + initialSleep/1000 + " sec before testing");
             try {
                 Thread.sleep(initialSleep);
@@ -175,9 +175,9 @@ public class DHTMain {
             }
             
 
-            System.out.println("Failing node 1");
-            nodeList.get(1).stopAllThreads();
-            nodeList.remove(1);
+            System.out.println("Failing node 0");
+            nodeList.get(0).stopAllThreads();
+            nodeList.remove(0);
 
             System.out.println("Start testing");
 
