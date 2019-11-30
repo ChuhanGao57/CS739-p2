@@ -266,7 +266,8 @@ public class DHTMain {
         int totalCnt = numKey * numNode;
         for(int i = 0; i < numKey; i++) {
             String randomKey = randomString();
-            InetSocketAddress nodeCorrect = correctQuery(randomKey, tree);
+            // InetSocketAddress nodeCorrect = correctQuery(randomKey, tree);
+            InetSocketAddress nodeCorrect = correctQuery(randomKey, nodeList);
             for(int j = 0; j < numNode; j++) {
                 DHTNode node = nodeList.get(j);
                 InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress());
@@ -301,6 +302,22 @@ public class DHTMain {
             return tree.get(succId).getAddress();
     }
 
+    private static InetSocketAddress correctQuery(String key, List<DHTNode> nodeList) {
+        long hash = Helper.hashString(key);
+        int numNode = nodeList.size();
+        long[] ids = new long[numNode];
+        for(int i = 0; i < numNode; i++) {
+            ids[i] = nodeList.get(i).getId();
+        }
+        if(hash <= ids[0] || hash > ids[numNode - 1])
+            return nodeList.get(0).getAddress();
+        for(int i = 0; i < numNode - 1; i++) {
+            if(hash > ids[i] && hash <= ids[i+1])
+                return nodeList.get(i+1).getAddress();
+        }
+        return null;
+    }
+ 
     private static boolean buildRing(int numNode, List<InetSocketAddress> addrList, List<DHTNode> nodeList) {
         int startingPort = 8001;
         for(int i = 0; i < numNode; i++) {
