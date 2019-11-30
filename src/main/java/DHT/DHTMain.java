@@ -389,10 +389,51 @@ public class DHTMain {
         return tree;
     }
 
+    public static void testKill() {
+        int numNode = 2;
+        List<InetSocketAddress> addrList = new ArrayList<>();
+        List<DHTNode> nodeList = new ArrayList<>();
+        try {
+            int startingPort = 8001;
+            for(int i = 0; i < numNode; i++) {
+                addrList.add(new InetSocketAddress("localhost", startingPort + i));
+                try {
+                    nodeList.add(new DHTNode(addrList.get(i)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            DHTNode n1 = nodeList.get(0);
+            DHTNode n2 = nodeList.get(1);
+            n1.join(n1.getAddress());
+            n2.join(n2.getAddress());
+
+            System.out.println("Trying to make RPC call");
+            RPCClient client = new RPCClient(n1, n2.getAddress());
+            boolean response = client.keepAlive();
+            client.shutdown();
+            System.out.println(response);
+
+            System.out.println("n2 shutdown");
+            n2.stopAllThreads();
+            System.out.println("Trying to make RPC call");
+            client = new RPCClient(n1, n2.getAddress());
+            response = client.keepAlive();
+            client.shutdown();
+            System.out.println(response);
+
+        } finally {
+            for(DHTNode node : nodeList) {
+                if(node != null)
+                    node.stopAllThreads();
+            }
+        }
+    }
+
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
         
-        DHTMain.testQueryKeys();
+        DHTMain.testKill();
 
     } 
 }
