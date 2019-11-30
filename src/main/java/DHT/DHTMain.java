@@ -270,7 +270,7 @@ public class DHTMain {
             for(int j = 0; j < numNode; j++) {
                 DHTNode node = nodeList.get(j);
                 InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress());
-                if(query.equals(nodeCorrect)) {
+                if(query.getPort() != nodeCorrect.getPort()) {
                     errCnt[j] += 1;
                     System.out.println(query.toString() + " VS " + nodeCorrect.toString());
                     //return;
@@ -350,7 +350,7 @@ public class DHTMain {
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
         
-        DHTMain.testQueryKeys();
+        DHTMain.testFailure();
 
     } 
 }
