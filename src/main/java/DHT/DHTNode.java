@@ -561,7 +561,6 @@ public class DHTNode {
 			stabilize.toDie();
 		if (ask_predecessor != null)
 			ask_predecessor.toDie();
-		System.exit(0);
 	}
 
 
