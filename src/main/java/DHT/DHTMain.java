@@ -269,7 +269,7 @@ public class DHTMain {
             InetSocketAddress nodeCorrect = correctQuery(randomKey, tree);
             for(int j = 0; j < numNode; j++) {
                 DHTNode node = nodeList.get(j);
-                InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress();
+                InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress());
                 if(query.equals(nodeCorrect)) {
                     errCnt[j] += 1;
                     System.out.println(query.toString() + " VS " + nodeCorrect.toString());
