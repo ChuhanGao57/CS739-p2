@@ -273,6 +273,7 @@ public class DHTMain {
                 InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress());
                 if(query.getPort() != nodeCorrect.getPort()) {
                     errCnt[j] += 1;
+                    System.out.println(query.toString() + " VS " + nodeCorrect.toString());
                     debugInfo(randomKey, nodeList);
                     //return;
                 }
