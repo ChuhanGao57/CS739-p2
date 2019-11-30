@@ -273,8 +273,7 @@ public class DHTMain {
                 InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress());
                 if(query.getPort() != nodeCorrect.getPort()) {
                     errCnt[j] += 1;
-                    System.out.println(query.toString() + " VS " + nodeCorrect.toString());
-                    System.out.println("Key: " + Helper.hashString(randomKey));
+                    debugInfo(randomKey, nodeList);
                     //return;
                 }
             }
@@ -316,6 +315,15 @@ public class DHTMain {
                 return nodeList.get(i+1).getAddress();
         }
         return null;
+    }
+
+    private static void debugInfo(String key, List<DHTNode> nodeList) {
+        long hash = Helper.hashString(key);
+        System.out.println("Key id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
+        for(DHTNode node : nodeList) {
+            hash = node.getId();
+            System.out.println("Node id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
+        }
     }
  
     private static boolean buildRing(int numNode, List<InetSocketAddress> addrList, List<DHTNode> nodeList) {
