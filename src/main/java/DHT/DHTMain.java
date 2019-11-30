@@ -323,7 +323,7 @@ public class DHTMain {
         System.out.println("Key id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
         for(DHTNode node : nodeList) {
             hash = node.getId();
-            System.out.println("Node id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
+            System.out.println(node.getAddress() + " Node id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
         }
 
         int numNode = nodeList.size();
