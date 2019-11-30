@@ -331,6 +331,7 @@ public class DHTMain {
         for(int i = 0; i < numNode; i++) {
             ids[i] = nodeList.get(i).getId();
         }
+        hash = Helper.hashString(key);
         System.out.println(hash <= ids[0] || hash > ids[numNode - 1]);
     }
  
