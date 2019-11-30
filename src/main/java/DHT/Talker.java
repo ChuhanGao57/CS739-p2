@@ -15,6 +15,7 @@ import java.net.Socket;
 public class Talker implements Runnable{
 
 	private DHTNode local;
+    private RPCServer server;
 
 	public Talker(DHTNode _local) {
         local = _local;
@@ -23,12 +24,14 @@ public class Talker implements Runnable{
 
 	public void run() {
 		try {
-			RPCServer server = new RPCServer(local);
+			this.server = new RPCServer(local);
 		} catch (IOException e) {
 			throw new RuntimeException(
 					"Cannot initiate RPC server", e);
 		}
 	}
 
-	
+	public void shutdown() {
+        this.server.stop();
+    }
 }

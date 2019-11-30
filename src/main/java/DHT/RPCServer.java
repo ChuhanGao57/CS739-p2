@@ -48,7 +48,7 @@ public class RPCServer {
         });
     }
 
-    private void stop() {
+    public void stop() {
         if (server != null) {
             server.shutdown();
         }

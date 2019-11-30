@@ -3,9 +3,11 @@ package DHT;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 
 public class DHTBench {
+    private static final Logger logger = Logger.getLogger(DHTBench.class.getName());
 
     private static Helper m_helper;
 
@@ -178,10 +180,37 @@ public class DHTBench {
             while(true) {
                 lastTestTime = System.currentTimeMillis();
                 List<Double> res = queryAccuracy(nodeList, numKey);
-                System.out.println(System.currentTimeMillis() - startTime + ", " + res.get(0) + ", " + res.get(1));
+                System.out.println((System.currentTimeMillis() - startTime)/1000 + ", " + res.get(0) + ", " + res.get(1)/numKey);
                 // System.out.println("Time: " + (lastTestTime - startTime) / 1000 + "sec, Accuracy: " + accuracy + ", average query latency: " + (double)(System.currentTimeMillis() - lastTestTime) / numKey/numNode + "ms");
                 long currTime = System.currentTimeMillis();
-                if(currTime - startTime > 30 * 1000)
+                if(currTime - startTime > 15 * 1000 && numFailure > 0) {
+                    List<Integer> selected = new ArrayList<Integer>();
+                    Random random = new Random();
+                    for(int i = 1; i <= numFailure; i++)
+                    {
+                        selected.add(i);
+                    }
+                    for(int i = numFailure + 1; i < numNode; i++)
+                    {
+                        if ((random.nextInt() % i + i) %i < numFailure)
+                        {
+                            selected.set((random.nextInt() % numFailure + numFailure)%numFailure, i);
+                        }
+                    }
+                    for (int i = 0; i < numFailure; i++)
+                    {
+                        logger.info("Shutting down server" + selected.get(i));
+                        nodeList.get(selected.get(i)).stopAllThreads();
+                        InetSocketAddress addr = nodeList.get(selected.get(i)).getAddress();
+                        DHTNode node = new DHTNode(addr);
+                        if (!node.join(nodeList.get(0).getAddress())) {
+                            throw new Exception("restart new node failed!");
+                        }
+                        nodeList.set(selected.get(i), node);
+                    }
+                    numFailure = 0;
+                }
+                if(currTime - startTime > 90 * 1000)
                     break;
                 try {
                     if(timeToSleep - (currTime - lastTestTime) > 0)
@@ -225,6 +254,7 @@ public class DHTBench {
                 InetSocketAddress q = queryId(Helper.hashString(randomKey), node.getAddress());
                 if(q == null || !q.equals(nodeCorrect)) {
                     errCnt[j] += 1;
+                    logger.info("Wrong key, " + q + ", " + nodeCorrect);
                     //System.out.println("Wrong query result");
                     //return;
                 }
@@ -306,8 +336,7 @@ public class DHTBench {
 
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
-        
-        DHTBench.testQueryFailure(0);
+        DHTBench.testQueryFailure(Integer.parseInt(args[0]));
 
     } 
 }
