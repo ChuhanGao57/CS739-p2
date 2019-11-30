@@ -152,6 +152,64 @@ public class DHTMain {
 
     }
 
+    public static void testFailure() {
+        m_helper = new Helper();
+        int numNode = 10;
+        int numKey = 50;
+        int timeToSleep = 3 * 1000; // in ms
+        List<InetSocketAddress> addrList = new ArrayList<>();
+        List<DHTNode> nodeList = new ArrayList<>();
+        try {
+            if(!buildRing(numNode, addrList, nodeList)) {
+                System.out.println("Build ring failed!");
+                return;
+            }
+            long startTime = System.currentTimeMillis();
+            long lastTestTime = startTime;
+            int initialSleep = 10 * 1000;
+            System.out.println("Sleeping " + initialSleep/1000 + " sec before testing");
+            try {
+                Thread.sleep(initialSleep);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            
+
+            System.out.println("Failing node 0 and 5");
+            nodeList.get(0).stopAllThreads();
+            nodeList.get(5).stopAllThreads();
+            nodeList.remove(5);
+            nodeList.remove(0);
+
+            System.out.println("Start testing");
+
+            while(true) {
+                lastTestTime = System.currentTimeMillis();
+                double accuracy = queryAccuracy(nodeList, numKey);
+                System.out.println("Time: " + (lastTestTime - startTime) / 1000 + "sec, Accuracy: " + accuracy + ", average query latency: " + (double)(System.currentTimeMillis() - lastTestTime) / numKey/numNode + "ms");
+                long currTime = System.currentTimeMillis();
+                if(currTime - startTime > 30 * 1000)
+                    break;
+                try {
+                    if(timeToSleep - (currTime - lastTestTime) > 0)
+                        Thread.sleep(timeToSleep - (currTime - lastTestTime));
+                } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            
+            
+            
+            System.out.println("All tests completed");
+
+        } finally {
+            for(DHTNode node : nodeList) {
+                if(node != null)
+                    node.stopAllThreads();
+            }
+        }
+    }
+
     public static void testQueryKeys() {
         m_helper = new Helper();
 
