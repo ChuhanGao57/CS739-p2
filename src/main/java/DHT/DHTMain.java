@@ -325,6 +325,13 @@ public class DHTMain {
             hash = node.getId();
             System.out.println("Node id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
         }
+
+        int numNode = nodeList.size();
+        long[] ids = new long[numNode];
+        for(int i = 0; i < numNode; i++) {
+            ids[i] = nodeList.get(i).getId();
+        }
+        System.out.println(hash <= ids[0] || hash > ids[numNode - 1]);
     }
  
     private static boolean buildRing(int numNode, List<InetSocketAddress> addrList, List<DHTNode> nodeList) {
