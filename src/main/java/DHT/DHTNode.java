@@ -203,7 +203,7 @@ public class DHTNode {
                         n_successor = null;               
                     
 					if (n_successor == null) {
-						System.out.println("It's not possible.");
+						// System.out.println("It's not possible.");
 						return localAddress;
 					}
 					continue;
