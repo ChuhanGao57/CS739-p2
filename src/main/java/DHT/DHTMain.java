@@ -154,7 +154,7 @@ public class DHTMain {
 
     public static void testFailure() {
         m_helper = new Helper();
-        int numNode = 10;
+        int numNode = 32;
         int numKey = 50;
         int timeToSleep = 3 * 1000; // in ms
         List<InetSocketAddress> addrList = new ArrayList<>();
@@ -175,8 +175,12 @@ public class DHTMain {
             }
             
 
-            System.out.println("Failing node 0");
+            System.out.println("Failing node 0, 2, 4");
             nodeList.get(0).stopAllThreads();
+            nodeList.get(2).stopAllThreads();
+            nodeList.get(4).stopAllThreads();
+            nodeList.remove(4);
+            nodeList.remove(2);
             nodeList.remove(0);
 
             System.out.println("Start testing");
@@ -186,7 +190,7 @@ public class DHTMain {
                 double accuracy = queryAccuracy(nodeList, numKey);
                 System.out.println("Time: " + (lastTestTime - startTime) / 1000 + "sec, Accuracy: " + accuracy + ", average query latency: " + (double)(System.currentTimeMillis() - lastTestTime) / numKey/numNode + "ms");
                 long currTime = System.currentTimeMillis();
-                if(currTime - startTime > 30 * 1000)
+                if(currTime - startTime > 60 * 1000)
                     break;
                 try {
                     if(timeToSleep - (currTime - lastTestTime) > 0)
