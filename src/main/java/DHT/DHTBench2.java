@@ -196,11 +196,6 @@ public class DHTBench2 {
                     {
                         logger.info("Shutting down server" + selected.get(i));
                         nodeList.get(selected.get(i)).stopAllThreads();
-                        // InetSocketAddress addr = nodeList.get(selected.get(i)).getAddress();
-                        // DHTNode node = new DHTNode(addr);
-                        // if (!node.join(nodeList.get(0).getAddress())) {
-                        //     throw new Exception("restart new node failed!");
-                        // }
                     }
                     for (int t : selected) {
                         nodeList.remove(t);

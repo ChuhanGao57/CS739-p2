@@ -3,10 +3,11 @@ package DHT;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 
 public class DHTMain {
-
+    private static final Logger logger = Logger.getLogger(DHTBench.class.getName());
     private static Helper m_helper;
 
     public static long randomIdInRange(long lo, long hi) {
@@ -152,7 +153,7 @@ public class DHTMain {
 
     }
 
-    public static void testFailure() {
+    public static void testFailure(int numFailure) {
         m_helper = new Helper();
         int numNode = 32;
         int numKey = 50;
@@ -175,13 +176,26 @@ public class DHTMain {
             }
             
 
-            System.out.println("Failing node 0, 2, 4");
-            nodeList.get(0).stopAllThreads();
-            nodeList.get(2).stopAllThreads();
-            nodeList.get(4).stopAllThreads();
-            nodeList.remove(4);
-            nodeList.remove(2);
-            nodeList.remove(0);
+            // System.out.println("Failing node 0, 2, 4");
+            // nodeList.get(0).stopAllThreads();
+            // nodeList.get(2).stopAllThreads();
+            // nodeList.get(4).stopAllThreads();
+            // nodeList.remove(4);
+            // nodeList.remove(2);
+            // nodeList.remove(0);
+            List<Integer> selected = new ArrayList<Integer>();
+            Random random = new Random();
+            for(int i = 1; i <= numFailure; i++)
+            {
+                selected.add(i);
+            }
+            for(int i = numFailure + 1; i < numNode; i++)
+            {
+                if ((random.nextInt() % i + i) %i < numFailure)
+                {
+                    selected.set((random.nextInt() % numFailure + numFailure)%numFailure, i);
+                }
+            }
 
             System.out.println("Start testing");
 
@@ -190,6 +204,17 @@ public class DHTMain {
                 double accuracy = queryAccuracy(nodeList, numKey);
                 System.out.println("Time: " + (lastTestTime - startTime) / 1000 + "sec, Accuracy: " + accuracy + ", average query latency: " + (double)(System.currentTimeMillis() - lastTestTime) / numKey/numNode + "ms");
                 long currTime = System.currentTimeMillis();
+                if(currTime - startTime > 15 * 1000 && numFailure > 0) {
+                    for (int i = 0; i < numFailure; i++)
+                    {
+                        logger.info("Shutting down server" + selected.get(i));
+                        nodeList.get(selected.get(i)).stopAllThreads();
+                    }
+                    for (int t : selected) {
+                        nodeList.remove(t);
+                    }
+                    numFailure = 0;
+                }
                 if(currTime - startTime > 60 * 1000)
                     break;
                 try {
@@ -437,7 +462,7 @@ public class DHTMain {
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
         
-        DHTMain.testFailure();
+        DHTMain.testFailure(3);
 
     } 
 }
