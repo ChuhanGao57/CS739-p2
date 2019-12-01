@@ -152,10 +152,39 @@ public class DHTMain {
 
     }
 
+    private static void failNodes(List<DHTNode> nodeList, int k) {
+        int n = nodeList.size();
+        if(k >= n) {
+            System.out.println("Err: trying to fail too many nodes");
+            return;
+        }
+        int i;
+        int reservoir[] = new int[k]; 
+        for (i = 0; i < k; i++) 
+            reservoir[i] = i; 
+          
+        Random r = new Random(); 
+          
+        // Iterate from the (k+1)th element to nth element 
+        for (; i < n; i++) 
+        { 
+            // Pick a random index from 0 to i. 
+            int j = r.nextInt(i + 1); 
+            if(j < k) 
+                reservoir[j] = i;             
+        } 
+        Arrays.sort(reservoir);
+        for(i = k- 1; i >= 0; i--) {
+            nodeList.get(reservoir[i]).stopAllThreads();
+            nodeList.remove(reservoir[i]);
+        }
+    }
+
     public static void testFailure() {
         m_helper = new Helper();
-        int numNode = 32;
+        int numNode = 10;
         int numKey = 50;
+        int numFail = 3;
         int timeToSleep = 3 * 1000; // in ms
         List<InetSocketAddress> addrList = new ArrayList<>();
         List<DHTNode> nodeList = new ArrayList<>();
@@ -175,13 +204,8 @@ public class DHTMain {
             }
             
 
-            System.out.println("Failing node 0, 2, 4");
-            nodeList.get(0).stopAllThreads();
-            nodeList.get(2).stopAllThreads();
-            nodeList.get(4).stopAllThreads();
-            nodeList.remove(4);
-            nodeList.remove(2);
-            nodeList.remove(0);
+            System.out.println("Failing " + numFail + " nodes");
+            failNodes(nodeList, numFail);
 
             System.out.println("Start testing");
 
@@ -277,8 +301,8 @@ public class DHTMain {
                 InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress());
                 if(query.getPort() != nodeCorrect.getPort()) {
                     errCnt[j] += 1;
-                    System.out.println(query.toString() + " VS " + nodeCorrect.toString());
-                    debugInfo(randomKey, nodeList);
+                    //System.out.println(query.toString() + " VS " + nodeCorrect.toString());
+                    //debugInfo(randomKey, nodeList);
                     //return;
                 }
             }
