@@ -154,38 +154,42 @@ public class DHTMain {
 
     private static void failNodes(List<DHTNode> nodeList, int k) {
         int n = nodeList.size();
+        if(k == 0) {
+            System.out.println("Err: No failure");
+            return;
+        }
         if(k >= n) {
             System.out.println("Err: trying to fail too many nodes");
             return;
         }
-        int i;
-        int reservoir[] = new int[k]; 
-        for (i = 0; i < k; i++) 
-            reservoir[i] = i; 
+        // int i;
+        // int reservoir[] = new int[k]; 
+        // for (i = 0; i < k; i++) 
+        //     reservoir[i] = i; 
           
-        Random r = new Random(); 
+        // Random r = new Random(0); 
           
-        // Iterate from the (k+1)th element to nth element 
-        for (; i < n; i++) 
-        { 
-            // Pick a random index from 0 to i. 
-            int j = r.nextInt(i + 1); 
-            if(j < k) 
-                reservoir[j] = i;             
-        } 
-        Arrays.sort(reservoir);
-        for(i = k- 1; i >= 0; i--) {
-            nodeList.get(reservoir[i]).stopAllThreads();
-            nodeList.remove(reservoir[i]);
+        // // Iterate from the (k+1)th element to nth element 
+        // for (; i < n; i++) 
+        // { 
+        //     // Pick a random index from 0 to i. 
+        //     int j = r.nextInt(i + 1); 
+        //     if(j < k) 
+        //         reservoir[j] = i;             
+        // } 
+
+        for(int i = k- 1; i >= 0; i--) {
+            nodeList.get(i).stopAllThreads();
+            nodeList.remove(i);
         }
     }
 
     public static void testFailure() {
         m_helper = new Helper();
-        int numNode = 10;
-        int numKey = 50;
-        int numFail = 3;
-        int timeToSleep = 3 * 1000; // in ms
+        int numNode = 32;
+        int numKey = 200;
+        int numFail = 5;
+        int timeToSleep = (int) (0.5 * 1000); // in ms
         List<InetSocketAddress> addrList = new ArrayList<>();
         List<DHTNode> nodeList = new ArrayList<>();
         try {
@@ -208,13 +212,13 @@ public class DHTMain {
             failNodes(nodeList, numFail);
 
             System.out.println("Start testing");
-
+            long testStart = System.currentTimeMillis();
             while(true) {
                 lastTestTime = System.currentTimeMillis();
-                double accuracy = queryAccuracy(nodeList, numKey);
-                System.out.println("Time: " + (lastTestTime - startTime) / 1000 + "sec, Accuracy: " + accuracy + ", average query latency: " + (double)(System.currentTimeMillis() - lastTestTime) / numKey/numNode + "ms");
+                double accuracy = queryAccuracy(nodeList, numKey / nodeList.size());
+                System.out.println("Time: " + (double)(lastTestTime - testStart) / 1000 + "sec, Accuracy: " + accuracy + ", average query latency: " + (double)(System.currentTimeMillis() - lastTestTime) / numKey/nodeList.size() + "ms");
                 long currTime = System.currentTimeMillis();
-                if(currTime - startTime > 60 * 1000)
+                if(currTime - testStart > 30 * 1000)
                     break;
                 try {
                     if(timeToSleep - (currTime - lastTestTime) > 0)
