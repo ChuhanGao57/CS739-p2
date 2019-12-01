@@ -152,6 +152,66 @@ public class DHTMain {
 
     }
 
+    public static void testFailure() {
+        m_helper = new Helper();
+        int numNode = 32;
+        int numKey = 50;
+        int timeToSleep = 3 * 1000; // in ms
+        List<InetSocketAddress> addrList = new ArrayList<>();
+        List<DHTNode> nodeList = new ArrayList<>();
+        try {
+            if(!buildRing(numNode, addrList, nodeList)) {
+                System.out.println("Build ring failed!");
+                return;
+            }
+            long startTime = System.currentTimeMillis();
+            long lastTestTime = startTime;
+            int initialSleep = 10 * 1000;
+            System.out.println("Sleeping " + initialSleep/1000 + " sec before testing");
+            try {
+                Thread.sleep(initialSleep);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            
+
+            System.out.println("Failing node 0, 2, 4");
+            nodeList.get(0).stopAllThreads();
+            nodeList.get(2).stopAllThreads();
+            nodeList.get(4).stopAllThreads();
+            nodeList.remove(4);
+            nodeList.remove(2);
+            nodeList.remove(0);
+
+            System.out.println("Start testing");
+
+            while(true) {
+                lastTestTime = System.currentTimeMillis();
+                double accuracy = queryAccuracy(nodeList, numKey);
+                System.out.println("Time: " + (lastTestTime - startTime) / 1000 + "sec, Accuracy: " + accuracy + ", average query latency: " + (double)(System.currentTimeMillis() - lastTestTime) / numKey/numNode + "ms");
+                long currTime = System.currentTimeMillis();
+                if(currTime - startTime > 60 * 1000)
+                    break;
+                try {
+                    if(timeToSleep - (currTime - lastTestTime) > 0)
+                        Thread.sleep(timeToSleep - (currTime - lastTestTime));
+                } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            
+            
+            
+            System.out.println("All tests completed");
+
+        } finally {
+            for(DHTNode node : nodeList) {
+                if(node != null)
+                    node.stopAllThreads();
+            }
+        }
+    }
+
     public static void testQueryKeys() {
         m_helper = new Helper();
 
@@ -210,12 +270,15 @@ public class DHTMain {
         int totalCnt = numKey * numNode;
         for(int i = 0; i < numKey; i++) {
             String randomKey = randomString();
-            InetSocketAddress nodeCorrect = correctQuery(randomKey, tree);
+            // InetSocketAddress nodeCorrect = correctQuery(randomKey, tree);
+            InetSocketAddress nodeCorrect = correctQuery(randomKey, nodeList);
             for(int j = 0; j < numNode; j++) {
                 DHTNode node = nodeList.get(j);
-                if(!queryId(Helper.hashString(randomKey), node.getAddress()).equals(nodeCorrect)) {
+                InetSocketAddress query = queryId(Helper.hashString(randomKey), node.getAddress());
+                if(query.getPort() != nodeCorrect.getPort()) {
                     errCnt[j] += 1;
-                    //System.out.println("Wrong query result");
+                    System.out.println(query.toString() + " VS " + nodeCorrect.toString());
+                    debugInfo(randomKey, nodeList);
                     //return;
                 }
             }
@@ -243,6 +306,44 @@ public class DHTMain {
             return tree.get(succId).getAddress();
     }
 
+    private static InetSocketAddress correctQuery(String key, List<DHTNode> nodeList) {
+        long hash = Helper.hashString(key);
+        int numNode = nodeList.size();
+        long[] ids = new long[numNode];
+        for(int i = 0; i < numNode; i++) {
+            ids[i] = nodeList.get(i).getId();
+        }
+        if(hash <= ids[0] || hash > ids[numNode - 1])
+            return nodeList.get(0).getAddress();
+        for(int i = 0; i < numNode - 1; i++) {
+            if(hash > ids[i] && hash <= ids[i+1])
+                return nodeList.get(i+1).getAddress();
+        }
+        return null;
+    }
+
+    private static void debugInfo(String key, List<DHTNode> nodeList) {
+        long hash = Helper.hashString(key);
+        System.out.println("Key id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
+        for(DHTNode node : nodeList) {
+            hash = node.getId();
+            System.out.println(node.getAddress() + " Node id: " + Helper.longTo8DigitHex(hash)+" ("+hash*100/Helper.getPowerOfTwo(32)+"%)");
+        }
+
+        int numNode = nodeList.size();
+        long[] ids = new long[numNode];
+        for(int i = 0; i < numNode; i++) {
+            ids[i] = nodeList.get(i).getId();
+        }
+        hash = Helper.hashString(key);
+        if(hash <= ids[0] || hash > ids[numNode - 1])
+            System.out.println("Flag 1");
+        for(int i = 0; i < numNode - 1; i++) {
+            if(hash > ids[i] && hash <= ids[i+1])
+                System.out.println("Flag 2: " + nodeList.get(i+1).getAddress());
+        }
+    }
+ 
     private static boolean buildRing(int numNode, List<InetSocketAddress> addrList, List<DHTNode> nodeList) {
         int startingPort = 6001;
         for(int i = 0; i < numNode; i++) {
@@ -279,6 +380,8 @@ public class DHTMain {
 
         nodeList.sort((DHTNode n1, DHTNode n2) -> Long.compare(n1.getId(), n2.getId()));
         addrList.sort((InetSocketAddress a1, InetSocketAddress a2) -> Long.compare(Helper.hashSocketAddress(a1), Helper.hashSocketAddress(a2)));
+        for(DHTNode node : nodeList)
+            System.out.println("Node id: " + node.getId());
         return true;
     }
 
@@ -290,10 +393,51 @@ public class DHTMain {
         return tree;
     }
 
+    public static void testKill() {
+        int numNode = 2;
+        List<InetSocketAddress> addrList = new ArrayList<>();
+        List<DHTNode> nodeList = new ArrayList<>();
+        try {
+            int startingPort = 8001;
+            for(int i = 0; i < numNode; i++) {
+                addrList.add(new InetSocketAddress("localhost", startingPort + i));
+                try {
+                    nodeList.add(new DHTNode(addrList.get(i)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            DHTNode n1 = nodeList.get(0);
+            DHTNode n2 = nodeList.get(1);
+            n1.join(n1.getAddress());
+            n2.join(n2.getAddress());
+
+            System.out.println("Trying to make RPC call");
+            RPCClient client = new RPCClient(n1, n2.getAddress());
+            boolean response = client.keepAlive();
+            client.shutdown();
+            System.out.println(response);
+
+            System.out.println("n2 shutdown");
+            n2.stopAllThreads();
+            System.out.println("Trying to make RPC call");
+            client = new RPCClient(n1, n2.getAddress());
+            response = client.keepAlive();
+            client.shutdown();
+            System.out.println(response);
+
+        } finally {
+            for(DHTNode node : nodeList) {
+                if(node != null)
+                    node.stopAllThreads();
+            }
+        }
+    }
+
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
         
-        DHTMain.testQueryKeys();
+        DHTMain.testFailure();
 
     } 
 }
