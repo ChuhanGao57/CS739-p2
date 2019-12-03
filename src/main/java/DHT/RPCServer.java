@@ -174,6 +174,16 @@ public class RPCServer {
             responseObserver.onCompleted();
         }
 
+        @Override
+        public void killNodeRPC(empty req, StreamObserver<empty> responseObserver) {
+            empty reply;
+            reply = empty.newBuilder().build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            local.exit();
+
+        }
+
     }
     
 }

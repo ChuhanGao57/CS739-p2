@@ -560,6 +560,11 @@ public class DHTNode {
 			ask_predecessor.toDie();
 	}
 
+	public void exit() {
+		stopAllThreads();
+		System.exit(0);
+	}
+
 	public void startAllThreads() {
 		listener.start();
 		stabilize.start();

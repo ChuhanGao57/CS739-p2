@@ -462,10 +462,21 @@ public class DHTMain {
         }
     }
 
+    public static void testKillNode() {
+        InetSocketAddress addr = new InetSocketAddress("localhost", 8001);
+        RPCClient client = new RPCClient(addr);
+        long nodeID = client.getId();
+        System.out.println("Node has ID: " + nodeID);
+        client.killNode();
+        nodeID = client.getId();
+        client.shutdown();
+        System.out.println("Node has ID: " + nodeID);
+    }
+
 
     public static void main(String[] args) throws IOException, InterruptedException, UnknownHostException {
         
-        DHTMain.testFailure();
+        DHTMain.testKillNode();
 
     } 
 }

@@ -180,6 +180,17 @@ public class RPCClient {
         }
     }
 
+    public void killNode() {
+        empty request = empty.newBuilder().build();
+        empty reply;
+        try {
+            reply = blockingStub.killNodeRPC(request);
+        } catch (StatusRuntimeException e) {
+            logger.log(Level.WARNING, "killNode RPC failed: {0}", e.getStatus());
+            return;
+        }
+    }
+
 
 
 

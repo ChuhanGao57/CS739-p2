@@ -24,6 +24,8 @@ service DHTRpc {
   rpc keepAliveRPC(empty) returns (keepAliveReply) {}
   // get the node's id
   rpc getIdRPC(empty) returns (getIdReply) {}
+  // kill a node
+  rpc killNodeRPC(empty) returns (empty) {}
 
 }
 
